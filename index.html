@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المَذْخُورَة لإدارة فواتير استلام التمور</title>
+    
+    <!-- Google Arabic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Reem+Kufi:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+
+    <!-- ====================================================================
+         Application Header & Navigation Bar (نظام المذخورة)
+         ==================================================================== -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-area">
+                <div class="brand-logo-icon animated-float">🌴</div>
+                <div>
+                    <h1 class="brand-title" id="navbarBrandName">المَذْخُورَة</h1>
+                    <p class="brand-subtitle">نظام إدارة فواتير واستلام ومعالجة التمور</p>
+                </div>
+            </div>
+
+            <nav class="nav-links-area">
+                <button class="nav-link active" data-target="invoice-form">
+                    <span>📝</span> فاتورة جديدة
+                </button>
+                <button class="nav-link" data-target="invoices-log">
+                    <span>📋</span> سجل الفواتير
+                </button>
+                <button class="nav-link" data-target="dashboard">
+                    <span>📊</span> الإحصائيات
+                </button>
+                <button class="nav-link" data-target="settings">
+                    <span>⚙️</span> الإعدادات والنسخ
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ====================================================================
+         Main Container
+         ==================================================================== -->
+    <main class="main-content">
+
+        <!-- ================================================================
+             VIEW 1: INVOICE FORM (Matching the Paper Receipt)
+             ================================================================ -->
+        <section id="invoice-form" class="view-section active-view-anim" style="display: block;">
+            
+            <div class="form-header-bar">
+                <div class="form-title-group">
+                    <h2>
+                        <span>📄</span> نموذج استلام التمور – المَذْخُورَة
+                        <span id="editModeBadge" class="edit-badge" style="display: none;"></span>
+                    </h2>
+                </div>
+
+                <div class="action-buttons-group">
+                    <button type="button" id="btnNewInvoice" onclick="window.invoiceManager.initNewInvoiceForm()" class="btn btn-outline" title="تجهيز فاتورة جديدة برقم تسلسلي تالي">
+                        <span>➕</span> فاتورة جديدة
+                    </button>
+                    <button type="button" id="btnSaveInvoice" onclick="window.invoiceManager.saveInvoice(false)" class="btn btn-primary btn-save-animated" title="حفظ الفاتورة والانتقال فوراً لسجل الفواتير">
+                        <span>💾</span> حفظ الفاتورة
+                    </button>
+                    <button type="button" id="btnSaveAndEdit" onclick="window.invoiceManager.saveInvoice(true)" class="btn btn-secondary" title="حفظ البيانات والبقاء في نفس النموذج">
+                        <span>💾✏️</span> حفظ ومتابعة
+                    </button>
+                    <button type="button" id="btnCopyCurrent" onclick="window.invoiceManager.copyCurrentWhatsApp()" class="btn btn-accent" title="نسخ بيانات الفاتورة لمشاركتها عبر واتساب">
+                        <span>📋</span> نسخ للواتساب
+                    </button>
+                    <button type="button" id="btnPrintCurrent" onclick="window.invoiceManager.printCurrent()" class="btn btn-outline" title="طباعة الفاتورة بتصميم الورقة الأصلية">
+                        <span>🖨️</span> طباعة الفاتورة
+                    </button>
+                    <button type="button" id="btnClearForm" onclick="if(confirm('هل تريد مسح كافة الخانات؟')) window.invoiceManager.resetForm();" class="btn btn-outline" title="مسح كافة المدخلات">
+                        <span>🧹</span> مسح النموذج
+                    </button>
+                    <button type="button" id="btnDeleteCurrent" onclick="window.invoiceManager.deleteCurrent()" class="btn btn-danger" style="display: none;" title="حذف الفاتورة الحالية">
+                        <span>🗑️</span> حذف الفاتورة
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paper Styled Form Wrapper -->
+            <div class="paper-form-wrapper">
+                <form id="invoiceForm" autocomplete="off" onsubmit="return false;">
+                    
+                    <!-- Serial Number & Status Header -->
+                    <div class="paper-header-row">
+                        <div class="serial-number-box">
+                            <span class="serial-prefix">№</span>
+                            <div class="serial-input-wrapper">
+                                <input type="text" id="invNumber" class="serial-input" placeholder="0001" title="رقم الفاتورة (تلقائي أو يدوي)">
+                            </div>
+                            <button type="button" id="btnAutoNumber" class="btn-auto-num" title="توليد رقم تسلسلي تالي تلقائياً">
+                                🔄 رقم تلقائي
+                            </button>
+                            <span id="invNumberWarning" style="display: none;"></span>
+                        </div>
+
+                        <div class="brand-receipt-tag">
+                            🌴 <strong>المَذْخُورَة للتمور</strong>
+                        </div>
+
+                        <div class="status-select-wrapper">
+                            <label for="invStatus">حالة الفاتورة:</label>
+                            <select id="invStatus" class="form-select">
+                                <option value="قيد الانتظار">قيد الانتظار</option>
+                                <option value="جاري المعالجة">جاري المعالجة</option>
+                                <option value="جاهز للاستلام">جاهز للاستلام</option>
+                                <option value="تم التسليم">تم التسليم</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Client & Order Info Grid (Exactly matching paper receipt table) -->
+                    <table class="receipt-grid-table">
+                        <tbody>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="invDay">اليوم :</label>
+                                        <input type="text" id="invDay" class="field-input" placeholder="مثال: الأحد">
+                                    </div>
+                                </td>
+                                <td style="width: 50%;">
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="invDate">التاريخ :</label>
+                                        <input type="date" id="invDate" class="field-input">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="customerName">الاسم :</label>
+                                        <input type="text" id="customerName" class="field-input" placeholder="اسم العميل الكامل / الثلاثي أو الرباعي">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="customerPhone">رقم الهاتف :</label>
+                                        <input type="tel" id="customerPhone" dir="ltr" class="field-input" placeholder="مثال: 92164292">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="customerAltPhone">رقم الهاتف البديل :</label>
+                                        <input type="tel" id="customerAltPhone" dir="ltr" class="field-input" placeholder="رقم هاتف إضافي (اختياري)">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="wilayat">الولاية :</label>
+                                        <input type="text" id="wilayat" class="field-input" placeholder="مثال: السيب، نزوى، الرستاق ...">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="area">المنطقه :</label>
+                                        <input type="text" id="area" class="field-input" placeholder="مثال: المعبيلة الجنوبية، الحيل ...">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="field-cell-group">
+                                        <label class="field-label" for="quantity">كميه التمر بالتقدير :</label>
+                                        <input type="text" id="quantity" class="field-input" placeholder="مثال: 4 جونية، 50 كجم، 8 سطل ...">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Date Types Section (نوع التمر) -->
+                    <div class="form-section-panel">
+                        <div class="section-panel-header">
+                            <span>🌾 نوع التمر (يمكن تحديد أكثر من نوع) :</span>
+                        </div>
+                        <div class="checkbox-options-grid">
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="فرض"> فرض
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="خلاص"> خلاص
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="بونارنجه"> بونارنجه
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="بومعان"> بومعان
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="برني"> برني
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="خنيزي"> خنيزي
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="نغال"> نغال
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="حنضل"> حنضل
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="قشوش بانواعه"> قشوش بانواعه
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="ام سله"> ام سله
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="خصاب"> خصاب
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="لولو"> لولو
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="بخيته"> بخيته
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="date_type" value="تمر غير معروف"> تمر غير معروف
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" id="date_other" name="date_type" value="أخرى"> أخرى
+                            </label>
+                        </div>
+                        <input type="text" id="otherDateInput" class="other-input-field" placeholder="حدد نوع التمر الآخر..." style="display: none;">
+                    </div>
+
+                    <!-- Work Types Section (نوع العمل) -->
+                    <div class="form-section-panel">
+                        <div class="section-panel-header">
+                            <span>⚙️ نوع العمل (يمكن تحديد أكثر من خيار) :</span>
+                        </div>
+                        <div class="checkbox-options-grid">
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك بخار"> مدلوك بخار
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك بدون بخار"> مدلوك بدون بخار
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك سبيشل"> مدلوك سبيشل
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك مكسرات مع"> مدلوك مكسرات مع
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="التشكيل ملة صغيرة"> التشكيل ملة صغيرة
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك مكسرات مع التشكيل ملة كبيرة"> مدلوك مكسرات مع التشكيل ملة كبيرة
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك ساده صغير"> مدلوك ساده صغير
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك ساده كبير"> مدلوك ساده كبير
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك في زبل"> مدلوك في زبل
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="مدلوك اكياس"> مدلوك اكياس
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="غسيل التمر"> غسيل التمر
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="تنقية التمر"> تنقية التمر
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="طابوق"> طابوق
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" name="work_type" value="شفط هواء"> شفط هواء
+                            </label>
+                            <label class="checkbox-custom-item">
+                                <input type="checkbox" id="work_other" name="work_type" value="عمل آخر"> عمل آخر
+                            </label>
+                        </div>
+                        <input type="text" id="otherWorkInput" class="other-input-field" placeholder="حدد تفاصيل العمل الآخر..." style="display: none;">
+                    </div>
+
+                    <!-- Notes Section (ملاحظة) -->
+                    <div class="form-section-panel">
+                        <div class="section-panel-header">
+                            <span>📝 ملاحظة :</span>
+                        </div>
+                        <textarea id="invNotes" class="notes-textarea" placeholder="اكتب هنا أي تعليمات إضافية (مثال: ١- إضافة سمسم، ٢- تسليم على دفعتين ...)"></textarea>
+                    </div>
+
+                    <!-- Signatures & Receiver Section -->
+                    <div class="signatures-grid-row">
+                        
+                        <!-- Customer Signature -->
+                        <div class="sig-box">
+                            <div class="sig-header">
+                                <label>توقيع الزبون :</label>
+                                <div class="sig-tools">
+                                    <button type="button" id="clearCustomerSig" class="btn-sig-tool">مسح</button>
+                                    <label class="btn-sig-tool" style="cursor: pointer;">
+                                        رفع صورة
+                                        <input type="file" id="uploadCustomerSig" accept="image/*" style="display: none;">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="sig-canvas-wrapper">
+                                <canvas id="customerSigCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Receiver Signature -->
+                        <div class="sig-box">
+                            <div class="sig-header">
+                                <label>توقيع الموظف / المستلم :</label>
+                                <div class="sig-tools">
+                                    <button type="button" id="clearReceiverSig" class="btn-sig-tool">مسح</button>
+                                    <label class="btn-sig-tool" style="cursor: pointer;">
+                                        رفع صورة
+                                        <input type="file" id="uploadReceiverSig" accept="image/*" style="display: none;">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="sig-canvas-wrapper">
+                                <canvas id="receiverSigCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Receiver Name -->
+                        <div class="sig-box">
+                            <div class="sig-header">
+                                <label for="receiverName">اسم مستلم التمر :</label>
+                            </div>
+                            <input type="text" id="receiverName" class="receiver-name-input" placeholder="اسم الموظف المستلم (مثال: طاهر)">
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Action Buttons -->
+                    <div class="form-bottom-actions">
+                        <button type="button" id="btnSaveBottom" class="btn btn-primary btn-save-animated" style="font-size: 1.15rem; padding: 13px 36px;">
+                            <span>💾</span> حفظ الفاتورة والانتقال لسجل الفواتير
+                        </button>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" onclick="window.invoiceManager.initNewInvoiceForm()" class="btn btn-secondary">
+                                <span>➕</span> فتح فاتورة جديدة
+                            </button>
+                            <button type="button" onclick="window.app.switchView('invoices-log')" class="btn btn-outline">
+                                <span>📋</span> الانتقال لسجل الفواتير
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+             VIEW 2: INVOICES LOG & SEARCH TABLE
+             ================================================================ -->
+        <section id="invoices-log" class="view-section">
+            
+            <div class="form-header-bar">
+                <div class="form-title-group">
+                    <h2>
+                        <span>📋</span> سجل فواتير المَذْخُورَة
+                        <span id="invoicesCountBadge" class="badge-tag live-counter-badge">0 فاتورة</span>
+                    </h2>
+                </div>
+
+                <div class="action-buttons-group">
+                    <button class="btn btn-primary" onclick="window.app.switchView('invoice-form'); window.invoiceManager.initNewInvoiceForm();">
+                        <span>➕</span> إضافة فاتورة جديدة
+                    </button>
+                    <button class="btn btn-outline" onclick="window.exportManager.exportToCSV()">
+                        <span>📊</span> تصدير Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-card animated-card">
+                
+                <!-- Advanced Search & Filter Controls -->
+                <div class="table-filter-bar">
+                    <div class="filter-row-top">
+                        <div class="search-input-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="searchQuery" class="search-box-input" placeholder="البحث الفوري برقم الفاتورة، اسم العميل، الهاتف، نوع التمر، نوع العمل ...">
+                        </div>
+
+                        <div class="filter-control">
+                            <label>الفرز:</label>
+                            <select id="sortBySelect">
+                                <option value="date_desc">التاريخ (الأحدث أولاً)</option>
+                                <option value="date_asc">التاريخ (الأقدم أولاً)</option>
+                                <option value="num_desc">رقم الفاتورة (تنازلي)</option>
+                                <option value="num_asc">رقم الفاتورة (تصاعدي)</option>
+                                <option value="name_asc">اسم العميل (أبجدي)</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>الصفوف:</label>
+                            <select id="pageSizeSelect">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-row-bottom">
+                        <div class="filter-control">
+                            <label>من تاريخ:</label>
+                            <input type="date" id="filterDateFrom">
+                        </div>
+
+                        <div class="filter-control">
+                            <label>إلى تاريخ:</label>
+                            <input type="date" id="filterDateTo">
+                        </div>
+
+                        <div class="filter-control">
+                            <label>نوع العمل:</label>
+                            <select id="filterWorkType">
+                                <option value="">جميع الأعمال</option>
+                                <option value="مدلوك بخار">مدلوك بخار</option>
+                                <option value="مدلوك بدون بخار">مدلوك بدون بخار</option>
+                                <option value="مدلوك اكياس">مدلوك اكياس</option>
+                                <option value="طابوق">طابوق</option>
+                                <option value="شفط هواء">شفط هواء</option>
+                                <option value="غسيل التمر">غسيل التمر</option>
+                                <option value="تنقية التمر">تنقية التمر</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>الحالة:</label>
+                            <select id="filterStatus">
+                                <option value="">جميع الحالات</option>
+                                <option value="قيد الانتظار">قيد الانتظار</option>
+                                <option value="جاري المعالجة">جاري المعالجة</option>
+                                <option value="جاهز للاستلام">جاهز للاستلام</option>
+                                <option value="تم التسليم">تم التسليم</option>
+                            </select>
+                        </div>
+
+                        <button id="btnResetSearch" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;">
+                            <span>🔄</span> مسح الفلاتر
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="table-responsive">
+                    <table id="invoicesTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ واليوم</th>
+                                <th>اسم العميل</th>
+                                <th>رقم الهاتف</th>
+                                <th>نوع التمر</th>
+                                <th>الكمية</th>
+                                <th>نوع العمل</th>
+                                <th>حالة الفاتورة</th>
+                                <th style="text-align: center;">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty state -->
+                <div id="invoicesEmptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon animated-float">🔍</div>
+                    <h3>لم يتم العثور على أي فواتير مطابقة</h3>
+                    <p>جرب تعديل كلمات البحث أو مسح الفلاتر لعرض كافة السجلات</p>
+                </div>
+
+                <!-- Pagination footer -->
+                <div id="invoicesPagination"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+             VIEW 3: DASHBOARD & STATISTICS
+             ================================================================ -->
+        <section id="dashboard" class="view-section">
+            
+            <div class="stats-header-bar">
+                <div class="form-title-group">
+                    <h2><span>📊</span> لوحة مؤشرات المَذْخُورَة</h2>
+                </div>
+
+                <div class="filter-control">
+                    <label>الفترة الزمنية:</label>
+                    <select id="statsPeriodFilter" class="form-select" style="font-weight: 700;">
+                        <option value="all">جميع الأوقات</option>
+                        <option value="today">اليوم</option>
+                        <option value="week">آخر 7 أيام</option>
+                        <option value="month">الشهر الحالي</option>
+                        <option value="year">هذا العام</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-cards-grid">
+                <div class="kpi-card animated-card">
+                    <div class="kpi-icon green">📄</div>
+                    <div class="kpi-content">
+                        <h3>إجمالي فواتير المذخورة</h3>
+                        <div class="kpi-number" id="statTotalInvoices">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card animated-card">
+                    <div class="kpi-icon blue">📅</div>
+                    <div class="kpi-content">
+                        <h3>فواتير اليوم</h3>
+                        <div class="kpi-number" id="statTodayInvoices">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card animated-card">
+                    <div class="kpi-icon amber">🗓️</div>
+                    <div class="kpi-content">
+                        <h3>فواتير الشهر الحالي</h3>
+                        <div class="kpi-number" id="statMonthInvoices">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card animated-card">
+                    <div class="kpi-icon purple">🎯</div>
+                    <div class="kpi-content">
+                        <h3>فواتير الفترة المحددة</h3>
+                        <div class="kpi-number" id="statPeriodInvoices">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                
+                <!-- Dates Varieties Chart -->
+                <div class="chart-card animated-card">
+                    <div class="chart-card-title">
+                        <span>🌴</span> أكثر أصناف التمور طلباً في المذخورة
+                    </div>
+                    <div id="chartTopDates"></div>
+                </div>
+
+                <!-- Work Types Chart -->
+                <div class="chart-card animated-card">
+                    <div class="chart-card-title">
+                        <span>⚙️</span> أكثر أعمال التجهيز والمعالجة طلباً
+                    </div>
+                    <div id="chartTopWorks"></div>
+                </div>
+
+                <!-- Status Summary Breakdown -->
+                <div class="chart-card animated-card" style="grid-column: 1 / -1;">
+                    <div class="chart-card-title">
+                        <span>📌</span> توزيع حالات الفواتير في الفترة المحددة
+                    </div>
+                    <div id="chartStatusSummary"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+             VIEW 4: SETTINGS & DATABASE MANAGEMENT
+             ================================================================ -->
+        <section id="settings" class="view-section">
+            
+            <div class="form-header-bar">
+                <div class="form-title-group">
+                    <h2><span>⚙️</span> إعدادات نظام المَذْخُورَة وقاعدة البيانات</h2>
+                </div>
+            </div>
+
+            <div class="settings-grid">
+                
+                <!-- General Branding Settings -->
+                <div class="settings-card animated-card">
+                    <div class="settings-card-title">
+                        <span>🏪</span> بيانات المحل والترويسة
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label for="settingStoreName">اسم المحل / المؤسسة:</label>
+                        <input type="text" id="settingStoreName" class="settings-input" placeholder="المذخورة لاستلام وتجهيز التمور">
+                    </div>
+
+                    <div class="settings-group">
+                        <label for="settingStorePhone">رقم هاتف التواصل:</label>
+                        <input type="text" id="settingStorePhone" dir="ltr" class="settings-input" placeholder="92164292">
+                    </div>
+
+                    <div class="settings-group">
+                        <label for="settingStoreAddress">الولاية / العنوان:</label>
+                        <input type="text" id="settingStoreAddress" class="settings-input" placeholder="سلطنة عمان - ولاية السيب">
+                    </div>
+
+                    <div class="settings-group">
+                        <label for="settingAdminPin">رمز الحماية السري (PIN):</label>
+                        <input type="password" id="settingAdminPin" class="settings-input" placeholder="اختياري - لحماية الحذف ومسح البيانات">
+                        <p class="settings-help-text">عند تعيين رمز PIN، سيطلبه النظام قبل حذف أي فاتورة أو مسح البيانات.</p>
+                    </div>
+
+                    <button type="button" id="btnSaveGeneralSettings" class="btn btn-primary" style="width: 100%;">
+                        <span>💾</span> حفظ الإعدادات
+                    </button>
+                </div>
+
+                <!-- Permanent Database & Backup Tools -->
+                <div class="settings-card animated-card">
+                    <div class="settings-card-title">
+                        <span>💾</span> قاعدة البيانات الدائمة والنسخ الاحتياطي
+                    </div>
+
+                    <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">
+                        يحفظ نظام المذخورة كافة الفواتير بشكل <strong>دائم في قاعدة بيانات IndexedDB محلية</strong> على جهازك، ولا تُحذف عند إغلاق المتصفح أو إيقاف تشغيل الجهاز.
+                    </p>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                        <button type="button" id="btnExportCSV" class="btn btn-outline">
+                            <span>📊</span> تصدير جميع الفواتير إلى Excel (CSV)
+                        </button>
+                        <button type="button" id="btnExportJSON" class="btn btn-secondary">
+                            <span>💾</span> تنزيل نسخة احتياطية كاملة (JSON)
+                        </button>
+                        
+                        <label class="btn btn-outline" style="cursor: pointer; text-align: center;">
+                            <span>📥</span> استعادة نسخة احتياطية من ملف (JSON)
+                            <input type="file" id="inputRestoreJSON" accept=".json" style="display: none;">
+                        </label>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                    <div class="settings-group">
+                        <button type="button" id="btnResetDatabase" class="btn btn-danger" style="width: 100%;">
+                            <span>⚠️</span> مسح كافة بيانات الفواتير من النظام
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cloud Sync (Supabase) Integration -->
+                <div class="settings-card animated-card" style="grid-column: 1 / -1;">
+                    <div class="settings-card-title" style="justify-content: space-between;">
+                        <div><span>☁️</span> الربط والمزامنة السحابية (Supabase)</div>
+                        <span id="supabaseStatusBadge" class="status-pill badge-secondary">○ قاعدة بيانات محلية</span>
+                    </div>
+
+                    <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">
+                        يتيح الربط مع <strong>Supabase</strong> مشاركة ومزامنة فواتير المذخورة بين الموظفين والأجهزة المختلفة (الكمبيوتر، الجوال، التابلت) في الوقت الفعلي.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="settings-group">
+                            <label for="supabaseUrl">رابط المشروع (Project URL):</label>
+                            <input type="url" id="supabaseUrl" dir="ltr" class="settings-input" placeholder="https://your-project.supabase.co">
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="supabaseKey">مفتاح الوصول العام (Anon Public Key):</label>
+                            <input type="password" id="supabaseKey" dir="ltr" class="settings-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <button type="button" id="btnSaveSupabaseConfig" class="btn btn-primary">
+                            <span>💾</span> حفظ إعدادات Supabase
+                        </button>
+                        <button type="button" id="btnTestSupabase" class="btn btn-secondary">
+                            <span>🔌</span> اختبار الاتصال
+                        </button>
+                        <button type="button" id="btnSyncSupabaseNow" class="btn btn-success">
+                            <span>🔄</span> مزامنة الآن (إرسال واستقبال)
+                        </button>
+                        <button type="button" id="btnCopySupabaseSQL" class="btn btn-outline">
+                            <span>📋</span> نسخ كود إنشاء الجدول (SQL Schema)
+                        </button>
+                    </div>
+
+                    <details style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
+                        <summary style="cursor: pointer; font-weight: 700; color: var(--primary-color);">
+                            📖 طريقة إعداد حساب وجدول Supabase في دقيقتين (خطوات سهلة):
+                        </summary>
+                        <ol style="padding-right: 20px; margin-top: 10px; font-size: 0.95rem; line-height: 1.8;">
+                            <li>سجل حساباً مجانياً على موقع <strong>supabase.com</strong> وأنشئ مشروعاً جديداً.</li>
+                            <li>من القائمة الجانبية ادخل على <strong>SQL Editor</strong>، ثم اضغط على زر <strong>«نسخ كود إنشاء الجدول»</strong> أعلاه والصقه هناك واضغط <strong>Run</strong>.</li>
+                            <li>ادخل على <strong>Project Settings -> API</strong> وانسخ <strong>Project URL</strong> و <strong>anon public key</strong>.</li>
+                            <li>الصق الرابط والمفتاح في الخانات أعلاه واضغط <strong>حفظ</strong> ثم <strong>اختبار الاتصال</strong>.</li>
+                        </ol>
+                    </details>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ====================================================================
+         INVOICE DETAIL MODAL (Exact Paper Replica Layout)
+         ==================================================================== -->
+    <div id="invoiceDetailModal" class="modal-overlay">
+        <div class="modal-content-card">
+            
+            <div class="modal-header">
+                <h3><span>📄</span> معاينة فاتورة استلام التمور – المَذْخُورَة</h3>
+                <button type="button" id="btnCloseModal" class="btn-close-modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Exact Paper Representation rendered dynamically -->
+                <div id="modalInvoicePaper"></div>
+            </div>
+
+            <div class="modal-footer">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" id="btnModalPrint" class="btn btn-primary">
+                        <span>🖨️</span> طباعة الفاتورة
+                    </button>
+                    <button type="button" id="btnModalPdf" class="btn btn-secondary">
+                        <span>📑</span> تصدير PDF
+                    </button>
+                    <button type="button" id="btnModalCopy" class="btn btn-accent">
+                        <span>📋</span> نسخ للواتساب
+                    </button>
+                    <button type="button" id="btnModalEdit" class="btn btn-outline">
+                        <span>✏️</span> تعديل البيانات
+                    </button>
+                </div>
+                <button type="button" onclick="window.app.closeInvoiceModal()" class="btn btn-outline">
+                    إغلاق
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ====================================================================
+         HIDDEN PRINT AREA (Targeted by CSS for Clean Receipt Printing)
+         ==================================================================== -->
+    <div id="printArea"></div>
+
+
+    <!-- ====================================================================
+         TOAST NOTIFICATIONS CONTAINER
+         ==================================================================== -->
+    <div id="toastContainer" class="toast-container"></div>
+
+
+    <!-- ====================================================================
+         Application JavaScript Modules
+         ==================================================================== -->
+    <script src="js/db.js"></script>
+    <script src="js/signature.js"></script>
+    <script src="js/invoice.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/supabase-sync.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
