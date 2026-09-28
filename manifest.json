@@ -1,0 +1,20 @@
+{
+  "name": "نظام المَذْخُورَة لإدارة فواتير استلام التمور",
+  "short_name": "المَذْخُورَة",
+  "description": "النظام الإلكتروني المتكامل لإدارة فواتير واستلام ومعالجة التمور باللغة العربية",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#047857",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
