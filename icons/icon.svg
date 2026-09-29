@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background Circle / Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.4" />
+
+  <!-- Palm Tree & Dates Art -->
+  <g filter="url(#shadow)" transform="translate(0, -10)">
+    <!-- Trunk -->
+    <path d="M256,410 C250,330 262,260 256,200 C250,260 262,330 256,410 Z" fill="#92400e" stroke="#78350f" stroke-width="4" />
+    <path d="M246,380 L266,380 M248,340 L264,340 M250,300 L262,300 M252,260 L260,260 M253,220 L259,220" stroke="#b45309" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Dates Bunches -->
+    <circle cx="238" cy="225" r="10" fill="url(#goldGrad)" />
+    <circle cx="248" cy="235" r="11" fill="url(#goldGrad)" />
+    <circle cx="236" cy="245" r="9" fill="url(#goldGrad)" />
+    <circle cx="274" cy="225" r="10" fill="url(#goldGrad)" />
+    <circle cx="264" cy="235" r="11" fill="url(#goldGrad)" />
+    <circle cx="276" cy="245" r="9" fill="url(#goldGrad)" />
+
+    <!-- Palm Fronds (Leaves) -->
+    <!-- Top Center -->
+    <path d="M256,195 Q256,100 256,80 Q258,110 256,195" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+    <path d="M256,195 Q230,120 180,95 Q220,130 256,195" fill="#16a34a" stroke="#15803d" stroke-width="3" />
+    <path d="M256,195 Q282,120 332,95 Q292,130 256,195" fill="#16a34a" stroke="#15803d" stroke-width="3" />
+
+    <!-- Left & Right Arching Fronds -->
+    <path d="M256,195 Q190,140 120,150 Q180,170 256,195" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+    <path d="M256,195 Q322,140 392,150 Q332,170 256,195" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+
+    <!-- Lower Fronds -->
+    <path d="M256,195 Q180,180 130,220 Q190,205 256,195" fill="#15803d" stroke="#14532d" stroke-width="3" />
+    <path d="M256,195 Q332,180 382,220 Q322,205 256,195" fill="#15803d" stroke="#14532d" stroke-width="3" />
+  </g>
+
+  <!-- Typography: المذخورة -->
+  <text x="256" y="455" font-family="'Cairo', 'Segoe UI', Tahoma, sans-serif" font-size="44" font-weight="900" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="2">المَذْخُورَة</text>
+</svg>

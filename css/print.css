@@ -1,0 +1,115 @@
+/* ==========================================================================
+   Date Receipt Invoice Management System - Print Stylesheet
+   تنسيقات الطباعة المطابقة لورقة استلام التمور الأصلية بدون أي أزرار أو قوائم
+   ========================================================================== */
+
+@media print {
+    /* Hide everything on screen except print area */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* Reset background and layout for printer */
+    html, body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    #printArea, #printArea * {
+        visibility: visible !important;
+    }
+
+    #printArea {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        padding: 10mm !important;
+        box-sizing: border-box !important;
+    }
+
+    .receipt-paper {
+        border: 2px solid #000000 !important;
+        box-shadow: none !important;
+        padding: 20px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        max-width: 800px !important;
+        background: #ffffff !important;
+        page-break-inside: avoid !important;
+    }
+
+    .serial-red {
+        color: #dc2626 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        font-size: 1.8rem !important;
+    }
+
+    .receipt-top-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 2px solid #000000 !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .receipt-brand-mark .brand-name-ar {
+        font-size: 1.6rem !important;
+        font-weight: 900 !important;
+        color: #000000 !important;
+    }
+
+    .receipt-table, .receipt-section-box {
+        border-color: #000000 !important;
+    }
+
+    .receipt-table td {
+        border-color: #000000 !important;
+        padding: 6px 10px !important;
+    }
+
+    .ink-handwritten {
+        color: #1e3a8a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        font-size: 1.1rem !important;
+    }
+
+    .paper-box {
+        border-color: #000000 !important;
+    }
+
+    .paper-box.checked {
+        color: #1e3a8a !important;
+        background-color: rgba(30, 58, 138, 0.1) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .receipt-notes-lines {
+        background: repeating-linear-gradient(
+            transparent,
+            transparent 31px,
+            #cbd5e1 31px,
+            #cbd5e1 32px
+        ) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .signatures-table td {
+        border-color: #000000 !important;
+    }
+
+    @page {
+        size: auto;
+        margin: 10mm;
+    }
+}
